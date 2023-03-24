@@ -134,6 +134,8 @@ app.post("/webhook", async (req, res) => {
       
     }
   }
+  res.status(201).json('')
+
 });
 
 // The code below was created to update the already existing records with weather info and probably will not be needed again
