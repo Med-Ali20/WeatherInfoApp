@@ -1,9 +1,9 @@
 const express = require("express");
 const axios = require("axios");
-require('dotenv')
+require("dotenv");
 const app = express();
 app.use(express.json());
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 5000;
 
 const airTableToken =
   "patzjlikGLPoDa8NS.5030003bc18705e531ea973fd7c644a83ea1677cb640858df738acf98b254691";
@@ -85,58 +85,59 @@ const updateRecords = async (id, recordWeatherInfo, city) => {
     });
 };
 
-app.get('/', (req, res) => {
-  res.send('<h1> Weather Info API </h1>')
-})
+app.get("/", (req, res) => {
+  res.send("<h1> Weather Info API </h1>");
+});
 
 app.post("/webhook", async (req, res) => {
   const records = [...req.body];
+  res.status(201).json("");
+
   const filteredRecords = records.filter((el) => {
     return el.name !== "Unnamed record";
   });
   filteredRecords.sort((a, b) => {
     return new Date(b.name) - new Date(a.name);
   });
-  console.log(filteredRecords)
+  console.log(filteredRecords);
   const recordId = filteredRecords[0].id;
-  const recordDate = filteredRecords[0].name
+  const recordDate = filteredRecords[0].name;
   const date = new Date(recordDate);
-  
+
   const year = date.getFullYear();
   const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate() + 1;
-  console.log(day)
+  console.log(day);
   try {
     await Promise.all(
-      locations.map(async (location) => {
-        const res = await getWeatherInfo(
-          weatherProviderAppKey,
-          location.location,
-          `${year.toString()}-${month.toString()}-${day.toString()}`
-        );
-        await updateRecords(recordId, res.data, location.city);
+      locations.map(async (location, i) => {
+        setTimeout(async () => {
+          const res = await getWeatherInfo(
+            weatherProviderAppKey,
+            location.location,
+            `${year.toString()}-${month.toString()}-${day.toString()}`
+          );
+          await updateRecords(recordId, res.data, location.city);
+        }, i * 120);
       })
     );
   } catch (error) {
     console.log(error);
     try {
       await Promise.all(
-      locations.map(async (location) => {
-        const res = await getWeatherInfo(
-          weatherProviderAppKey,
-          location.location,
-          `${year.toString()}-${month.toString()}-${day.toString()}`
-        );
-        await updateRecords(recordId, res.data, location.city);
-      })
-    );
+        locations.map(async (location) => {
+          const res = await getWeatherInfo(
+            weatherProviderAppKey,
+            location.location,
+            `${year.toString()}-${month.toString()}-${day.toString()}`
+          );
+          await updateRecords(recordId, res.data, location.city);
+        })
+      );
     } catch (error) {
-      console.log(error)
-      
+      console.log(error);
     }
   }
-  res.status(201).json('')
-
 });
 
 // The code below was created to update the already existing records with weather info and probably will not be needed again
