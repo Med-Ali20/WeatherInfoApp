@@ -100,13 +100,13 @@ app.post("/webhook", async (req, res) => {
     return new Date(b.name) - new Date(a.name);
   });
   console.log(filteredRecords);
-  const recordId = filteredRecords[0].id;
-  const recordDate = filteredRecords[0].name;
+  const recordId = filteredRecords[3].id;
+  const recordDate = filteredRecords[3].name;
   const date = new Date(recordDate);
 
   const year = date.getFullYear();
   const month = date.getUTCMonth() + 1;
-  const day = date.getUTCDate() + 1;
+  const day = date.getUTCDate();
   console.log(day);
   try {
     await Promise.all(
