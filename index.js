@@ -64,8 +64,8 @@ const updateRecords = async (id, recordWeatherInfo, city) => {
     recordWeatherInfo.forecast.forecastday[0].day.maxtemp_f;
   fields[`Weather Condition - ${city}`] =
     recordWeatherInfo.forecast.forecastday[0].day.condition.text;
-  axios
-    .patch(
+  try {
+    axios.patch(
       `https://api.airtable.com/v0/${baseId}/${tableId}/${id}`,
       {
         fields,
@@ -75,14 +75,8 @@ const updateRecords = async (id, recordWeatherInfo, city) => {
           Authorization: `Bearer ${airTableToken}`,
         },
       }
-    )
-    .then((res) => {
-      console.log(res.data);
-    })
-    .catch((error) => {
-      console.log(error);
-      return;
-    });
+    );
+  } catch (error) { console.log(error) }
 };
 
 app.get("/", (req, res) => {
@@ -99,14 +93,13 @@ app.post("/webhook", async (req, res) => {
   filteredRecords.sort((a, b) => {
     return new Date(b.name) - new Date(a.name);
   });
-  console.log(filteredRecords);
   const recordId = filteredRecords[0].id;
   const recordDate = filteredRecords[0].name;
   const date = new Date(recordDate);
 
   const year = date.getFullYear();
   const month = date.getUTCMonth() + 1;
-  const day = date.getUTCDate();
+  const day = date.getUTCDate() + 1;
   console.log(day);
   try {
     await Promise.all(
@@ -123,20 +116,6 @@ app.post("/webhook", async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    try {
-      await Promise.all(
-        locations.map(async (location) => {
-          const res = await getWeatherInfo(
-            weatherProviderAppKey,
-            location.location,
-            `${year.toString()}-${month.toString()}-${day.toString()}`
-          );
-          await updateRecords(recordId, res.data, location.city);
-        })
-      );
-    } catch (error) {
-      console.log(error);
-    }
   }
 });
 
