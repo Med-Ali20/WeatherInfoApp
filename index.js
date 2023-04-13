@@ -76,7 +76,9 @@ const updateRecords = async (id, recordWeatherInfo, city) => {
         },
       }
     );
-  } catch (error) { console.log(error) }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 app.get("/", (req, res) => {
@@ -94,12 +96,15 @@ app.post("/webhook", async (req, res) => {
     return new Date(b.name) - new Date(a.name);
   });
   const recordId = filteredRecords[0].id;
-  const recordDate = filteredRecords[0].name;
-  const date = new Date(recordDate);
+  const initailDate = new Date();
+  const cairoDateString = initailDate.toLocaleString("en-US", {
+    timeZone: "Africa/Cairo",
+  });
+  const date = new Date(cairoDateString);
 
   const year = date.getFullYear();
   const month = date.getUTCMonth() + 1;
-  const day = date.getUTCDate() + 1;
+  const day = date.getDate();
   console.log(day);
   try {
     await Promise.all(
@@ -118,7 +123,6 @@ app.post("/webhook", async (req, res) => {
     console.log(error);
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`App is Running On Port ${PORT}`);
