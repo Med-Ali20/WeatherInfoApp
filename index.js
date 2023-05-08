@@ -43,17 +43,21 @@ const locations = [
 ];
 
 const getWeatherInfo = async (key, q, dt) => {
-  const recordWeatherInfo = await axios.get(
-    "http://api.weatherapi.com/v1/history.json",
-    {
-      params: {
-        key,
-        q,
-        dt,
-      },
-    }
-  );
-  return recordWeatherInfo;
+  try {
+    const recordWeatherInfo = await axios.get(
+      "http://api.weatherapi.com/v1/history.json",
+      {
+        params: {
+          key,
+          q,
+          dt,
+        },
+      }
+    );
+    return recordWeatherInfo;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const updateRecords = async (id, recordWeatherInfo, city) => {
@@ -86,27 +90,26 @@ app.get("/", (req, res) => {
 });
 
 app.post("/webhook", async (req, res) => {
-  const records = [...req.body];
-  res.status(201).json("");
-
-  const filteredRecords = records.filter((el) => {
-    return el.name !== "Unnamed record";
-  });
-  filteredRecords.sort((a, b) => {
-    return new Date(b.name) - new Date(a.name);
-  });
-  const recordId = filteredRecords[0].id;
-  const initailDate = new Date();
-  const cairoDateString = initailDate.toLocaleString("en-US", {
-    timeZone: "Africa/Cairo",
-  });
-  const date = new Date(cairoDateString);
-
-  const year = date.getFullYear();
-  const month = date.getUTCMonth() + 1;
-  const day = date.getDate();
-  console.log(day);
   try {
+    const records = [...req.body];
+    res.status(201).json("");
+    const filteredRecords = records.filter((el) => {
+      return el.name !== "Unnamed record";
+    });
+    filteredRecords.sort((a, b) => {
+      return new Date(b.name) - new Date(a.name);
+    });
+    const recordId = filteredRecords[0].id;
+    const initailDate = new Date();
+    const cairoDateString = initailDate.toLocaleString("en-US", {
+      timeZone: "Africa/Cairo",
+    });
+    const date = new Date(cairoDateString);
+
+    const year = date.getFullYear();
+    const month = date.getUTCMonth() + 1;
+    const day = date.getDate();
+    console.log(day);
     await Promise.all(
       locations.map(async (location, i) => {
         setTimeout(async () => {
